@@ -9,84 +9,17 @@ import datetime
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 
+import Models.employee as foo
+import Models.user as U
+
+import schema as e
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost:3306/flask'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 ma = Marshmallow(app)
-
-
-
-#Table
-class Employee(db.Model):
-   __tablename__ = "employee"
-   id = db.Column(db.Integer, primary_key=True)
-   name = db.Column(db.String(20))
-   email = db.Column(db.String(50), nullable = False)
-   mobile = db.Column(db.Integer)
-   department = db.Column(db.String(20))
-   joining_date = db.Column(db.Date)
-   designation = db.Column(db.String(50))
-   experience = db.Column(db.String(100))
-   level = db.Column(db.Integer)
-   left_date = db.Column(db.Date)
-   dob = db.Column(db.Date)
-   created = db.Column(db.DateTime)
-   updated = db.Column(db.DateTime)
-   
-   
-   def create(self):
-       db.session.add(self)
-       db.session.commit()
-       return self
-
-   def __init__(self, name, email, mobile, department, joining_date, designation, experience, level, left_date, dob):
-       self.name = name
-       self.email = email
-       self.mobile = mobile
-       self.department = department
-       self.joining_date = joining_date
-       self.designation = designation
-       self.experience = experience
-       self.level = level
-       self.left_date = left_date
-       self.dob = dob
-       
-      
-
-   def __repr__(self):
-       return f"{self.id}"
-
-
-db.create_all()
-
-
-class employeeSchema(ma.Schema):
-   class Meta(ma.Schema.Meta):
-       model = Employee
-       sqla_session = db.session
-   id = fields.Number(dump_only=True)
-   name = fields.String(required=True)
-   email = fields.String(required=True)
-   mobile = fields.Integer(required=True)
-   department = fields.String(required=True)
-   joining_date = fields.Date(required=True)
-   designation = fields.String(required=True)
-   experience = fields.String(required=True)
-   level = fields.Integer(required=True)
-   left_date = fields.Date(required=True)
-   dob = fields.Date(required=True)
-   
-
-   
-# @app.route('/api/employee', methods=['POST'])
-# def create_employee():
-#    data = request.get_json()
-#    employee_schema = employeeSchema()
-#    employee = employee_schema.load(data)
-#    result = employee_schema.dump(employee.create())
-#    return make_response(jsonify({"employee": result}), 200)
 
 
 # employee post 
@@ -105,32 +38,27 @@ def add_employee():
     left_date = request.json['left_date']
     dob = request.json['dob']
     
-    
 
-    #Instantiate new user
-    employee = Employee(name, email, mobile, department,
+    employee = foo.Employee(name, email, mobile, department,
                         joining_date, designation, experience, level, left_date, dob)
-    #add new user
+    
     db.session.add(employee)
-    #commit the change to reflect in database
     db.session.commit()
-    #return the response
-    # or you can use: return jsonify(user_schema.dump(new_user))
-    return employeeSchema.jsonify(employee)
+    return e.employeeSchema.jsonify(employee)
 
 
 @app.route('/api/employee', methods=['GET'])
 def index():
-   get_employee = Employee.query.all()
-   employee_schema = employeeSchema(many=True)
+   get_employee = foo.Employee.query.all()
+   employee_schema = e.employeeSchema(many=True)
    employee = employee_schema.dump(get_employee)
    return make_response(jsonify({"employee": employee}))
 
 
 @app.route('/api/employee/<id>', methods=['GET'])
 def get_employee_by_id(id):
-   get_employee = Employee.query.get(id)
-   todo_schema = employeeSchema()
+   get_employee = foo.Employee.query.get(id)
+   todo_schema = e.employeeSchema()
    employee = todo_schema.dump(get_employee)
    return make_response(jsonify({"employee": employee}))
 
@@ -138,7 +66,7 @@ def get_employee_by_id(id):
 @app.route('/api/employee/<id>', methods=['PUT'])
 def update_employee_by_id(id):
    data = request.get_json()
-   get_employee = Employee.query.get(id)
+   get_employee = foo.Employee.query.get(id)
    if data.get('name'):
        get_employee.name = data['name']
    if data.get('mobile'):
@@ -162,7 +90,7 @@ def update_employee_by_id(id):
        
    db.session.add(get_employee)
    db.session.commit()
-   employee_schema = employeeSchema(
+   employee_schema = e.employeeSchema(
        only=['id', 'name', 'mobile', 'department', 'joining_date', 'designation', 'experience', 'level', 'left_date', 'dob'])
    employee = employee_schema.dump(get_employee)
 
@@ -171,80 +99,10 @@ def update_employee_by_id(id):
 
 @app.route('/api/employee/<id>', methods=['DELETE'])
 def delete_employee_by_id(id):
-   get_employee = Employee.query.get(id)
+   get_employee = foo.Employee.query.get(id)
    db.session.delete(get_employee)
    db.session.commit()
    return make_response("", 204)
-
-
-class Register(db.Model):
-   __tablename__ = "register"
-   id = db.Column(db.Integer, primary_key=True)
-   email = db.Column(db.String(50), nullable = False, unique = True)
-   password = db.Column(db.String(50), nullable = False)
-   created = db.Column(db.DateTime)
-   updated = db.Column(db.DateTime)
-   
-   
-   def create(self):
-       db.session.add(self)
-       db.session.commit()
-       return self
-    
-   def __init__(self, email, password):
-        self.email = email
-        self.password = password
-       
-        
-   def __repr__(self):
-       return f"{self.id}"
-
-
-db.create_all()
-
-
-class registerSchema(ma.Schema):
-   class Meta:
-       model = Employee
-       sqla_session = db.session
-   id = fields.Number(dump_only=True)
-  
-   email = fields.String(required=True)
-   password = fields.String(required=True)
-  
-  
-@app.route('/api/register', methods=['POST'])
-def add_register():
-  
-    email = request.json['email']
-    password = request.json['password']
-    
-    register = Register(email, password)
-    #add new user
-    db.session.add(register)
-  
-    db.session.commit()
-   
-    return employeeSchema.jsonify(register)
-
-
-class User(db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(52), index=True)
-    password_hash = db.Column(db.String(128))
-    
-    def hash_password(self, password):
-        self.password_hash = pwd_context.encrypt(password)
-
-def verify_password(self, password):
-        return pwd_context.verify(password, self.password_hash)
-    
-  
-
-
-db.create_all()
-    
 
    
     
@@ -254,9 +112,9 @@ def new_user():
     password = request.json.get('password')
     if email is None or password is None:
         abort(400)  # missing arguments
-    if User.query.filter_by(email=email).first() is not None:
+    if U.User.query.filter_by(email=email).first() is not None:
         abort(400)  # existing user
-    user = User(email=email)
+    user = U.User(email=email)
     user.hash_password(password)
     db.session.add(user)
     db.session.commit()
@@ -271,7 +129,7 @@ def login_user():
     email = request.json.get('email')
     password = request.json.get('password')
     
-    user = User.query.filter_by(email=email).first()
+    user = U.User.query.filter_by(email=email).first()
     
     passs = (pwd_context.verify(password, user.password_hash))
     
