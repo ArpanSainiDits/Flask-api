@@ -2,16 +2,18 @@ from flask import Flask
 from flask_restful import Api
 from db import app
 
-from services.views import delEmp, getEmp, getEmpId, addEmp, updateEmp, delEmp, addUser
+from services.views import delEmp, getEmp, getEmpId, addEmp, updateEmp, delEmp, addUser, login
 
 
 def view_routes(app):
     api = Api(app)
 
-    api.add_resource(getEmp, '/api/getemp')
-    api.add_resource(getEmpId, '/api/getemp/<id>')
-    api.add_resource(addEmp, '/api/addemp')
-    api.add_resource(updateEmp, '/api/updateemp')
-    api.add_resource(delEmp, '/api/delemp')
-    api.add_resource(addUser, '/api/adduser')
+    api.add_resource(getEmp, '/api/Getemployee')
+    api.add_resource(getEmpId, '/api/Getemployee/<id>')
+    api.add_resource(addEmp, '/api/Postemployee')
+    api.add_resource(updateEmp, '/api/Upemployee/<id>')
+    api.add_resource(delEmp, '/api/Delemployee/<id>')
+    api.add_resource(addUser, '/api/users')
+    api.add_resource(login, '/api/login')
+    
 
