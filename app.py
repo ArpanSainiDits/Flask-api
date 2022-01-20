@@ -14,12 +14,9 @@ import Models.user as U
 
 import schema as e
 
+from db import app, db, ma, migrate
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost:3306/flask'
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-ma = Marshmallow(app)
+
 
 
 # employee post 
@@ -145,3 +142,5 @@ def login_user():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+

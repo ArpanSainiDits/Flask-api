@@ -4,13 +4,10 @@ from flask_sqlalchemy import SQLAlchemy
 from marshmallow import fields
 from flask import Flask
 import Models.employee as foo
+from db import app,db,ma,migrate
 
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost:3306/flask'
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-ma = Marshmallow(app)
+
 
 
 class employeeSchema(ma.Schema):
@@ -28,3 +25,4 @@ class employeeSchema(ma.Schema):
    level = fields.Integer(required=True)
    left_date = fields.Date(required=True)
    dob = fields.Date(required=True)
+        
